@@ -32,13 +32,5 @@ public class ProcessingTask extends Thread {
     	if(!deferredStatus){
     		LOG.warn("non-blocking request set or expired");
     	}
-	    /*
-        if (deferredResult.isSetOrExpired()) {
-            LOG.warn("{}: Processing of non-blocking request #{} already expired", concReqs, reqId);        
-	    } else {
-	        boolean deferredStatus = deferredResult.setResult(new ProcessingStatus("Ok"));
-            LOG.debug("{}: Processing of non-blocking request #{} done, deferredStatus = {}", concReqs, reqId, deferredStatus);        
-	    }
-	    */
 	}
 }
