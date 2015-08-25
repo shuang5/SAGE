@@ -1,5 +1,8 @@
 package ndl_propertygraph;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -14,9 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.tinkerpop.blueprints.Graph;
@@ -42,7 +48,29 @@ public class ResourceController {
 		*/
 		ml=new ManifestLoader(rdfFile);
     }
-    
+    @RequestMapping(value="/upload", method=RequestMethod.GET)
+    public @ResponseBody String provideUploadInfo() {
+        return "You can upload a file by posting to this same URL.";
+    }
+
+    @RequestMapping(value="/upload", method=RequestMethod.POST)
+    public @ResponseBody String handleFileUpload(@RequestParam("name") String name,
+            @RequestParam("file") MultipartFile file){
+        if (!file.isEmpty()) {
+            try {
+                byte[] bytes = file.getBytes();
+                BufferedOutputStream stream = 
+                        new BufferedOutputStream(new FileOutputStream(new File(name)));
+                stream.write(bytes);
+                stream.close();
+                return "You successfully uploaded " + name + "!";
+            } catch (Exception e) {
+                return "You failed to upload " + name + " => " + e.getMessage();
+            }
+        } else {
+            return "You failed to upload " + name + " because the file was empty.";
+        }
+    }
     @RequestMapping("/nodes")
     public PropertyGraphNode nodes(@RequestParam(value="id", defaultValue="1") int id) {
     	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
