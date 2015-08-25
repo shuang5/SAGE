@@ -1,34 +1,33 @@
 package ndl_propertygraph;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 
-import orca.ndllib.propertygraph.ManifestPropertygraphImpl;
-import orca.ndllib.propertygraph.connector.OrcaNode;
+import javax.servlet.http.HttpServletRequest;
+
 import orca.ndllib.propertygraph.connector.PropertyGraphNode;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.context.request.async.DeferredResult;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.Vertex;
-import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
 import com.tinkerpop.gremlin.java.GremlinPipeline;
-import com.tinkerpop.pipes.PipeFunction;
-import com.tinkerpop.pipes.branch.LoopPipe.LoopBundle;
 
 @RestController
 public class ResourceController {
 
-    private static final String template = "Hello, %s!";
     private final AtomicLong counter = new AtomicLong();
+    private static final Logger LOG=LoggerFactory.getLogger(ResourceController.class);
     private ManifestLoader ml;
     public ResourceController(){
     	String rdfFile="/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/interdomain-manifest.rdf";
@@ -44,11 +43,6 @@ public class ResourceController {
 		ml=new ManifestLoader(rdfFile);
     }
     
-    @RequestMapping("/greeting")
-    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
-        return new Greeting(counter.incrementAndGet(),
-                            String.format(template, name));
-    }
     @RequestMapping("/nodes")
     public PropertyGraphNode nodes(@RequestParam(value="id", defaultValue="1") int id) {
     	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
@@ -74,7 +68,7 @@ public class ResourceController {
     	}
 		return list;    	
     }
-    @RequestMapping("neighbors")
+    @RequestMapping("/neighbors")
     public List<PropertyGraphNode> neighbors(@RequestParam(value="id", defaultValue="1") int id) {
     	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
     	final Graph graph=ml.getGraph();
@@ -88,52 +82,29 @@ public class ResourceController {
     	}
 		return list;    	
     }
-    @RequestMapping("shortestpath")
+    @RequestMapping("/shortestpath")
     public List<PropertyGraphNode> shortestpath(@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {
     	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
     	final Graph graph=ml.getGraph();
-    	if(graph.getVertex(id1)==null)
-    		throw new NodeNotFoundException(String.valueOf(id1));
-    	else 
-        	if(graph.getVertex(id2)==null)
-        		throw new NodeNotFoundException(String.valueOf(id2));
-    	final Vertex start=graph.getVertex(id1);
-    	final Vertex end=graph.getVertex(id2);
-    	int n=0;
-    	for(@SuppressWarnings("unused") Object v:graph.getVertices()){
-    		n++;
-    	}
-    	final int nn=n*n;
-    	@SuppressWarnings("rawtypes")
-		GremlinPipeline<Vertex, List> pipe = new GremlinPipeline<Vertex, List<Vertex>>(start).as("orcaNode").both("connectedTo").
-    			loop("orcaNode", new PipeFunction<LoopBundle<Vertex>, Boolean>() {
-    				@Override
-    				public Boolean compute(LoopBundle<Vertex> bundle) {
-    					//System.out.println(bundle.getLoops());
-    					return bundle.getLoops() <nn && bundle.getObject() != end;
-    				}
-    			}).path();
-    	ArrayList<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
-    	if (pipe.hasNext()) {
-    		final ArrayList<Vertex> shortestPath = (ArrayList<Vertex>) pipe.next();
-    		for(final Vertex v:shortestPath){
-    			list.add(new PropertyGraphNode(v));
-    		}
-    	}
-		return list;    	
+    	return GraphUtil.shortestpath(graph, id1, id2);
     }
-    @ResponseStatus(value=HttpStatus.NOT_FOUND, reason="No such node")  // 404
-    public class NodeNotFoundException extends RuntimeException {
-
-		/**
-		 * 
-		 */
-		private static final long serialVersionUID = 1L;
-
-		public NodeNotFoundException(String id) {
-			super(id);
-		}
-        // ...
+    @RequestMapping("/nb/shortestpath")
+    public DeferredResult<List<PropertyGraphNode>> nonBlockingShortestPath(@RequestParam(value="start",required=true) int id1,
+    		@RequestParam(value="end",required=true) int id2) {
+        // Initiate the processing in another thread
+        DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
+        ProcessingTask task = new ProcessingTask(ml.getGraph(),id1,id2, deferredResult);
+        task.start();
+        return deferredResult;
     }
+    @ExceptionHandler(Exception.class)
+	public ModelAndView handleAllException(Exception ex) {
+
+		ModelAndView model = new ModelAndView("error/generic_error");
+		model.addObject("errMsg", "this is Exception.class");
+
+		return model;
+
+	}
 }
