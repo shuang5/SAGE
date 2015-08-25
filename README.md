@@ -15,6 +15,10 @@ III. get all nodes with attributes
 
 http://localhost:9000/allnodes
 
-V. get the shortestpath between 1 and 3 using non-blocking call
+IV. get the shortestpath between 1 and 3 using non-blocking call
 
 http://localhost:9000/nb/shortestpath?start=1&end=3
+
+V. upload 
+
+http://localhost:9000
