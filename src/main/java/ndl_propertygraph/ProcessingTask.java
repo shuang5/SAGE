@@ -19,7 +19,7 @@ public class ProcessingTask extends Thread {
 	private Graph graph;
 	private int id1;
 	private int id2;
-	public ProcessingTask( Graph graph, int id1,int id2,DeferredResult<List<PropertyGraphNode>> deferredResult) {
+	public ProcessingTask( final Graph graph, final int id1,final int id2,DeferredResult<List<PropertyGraphNode>> deferredResult) {
 		this.deferredResult = deferredResult;
 		this.graph=graph;
 		this.id1=id1;

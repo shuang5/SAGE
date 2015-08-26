@@ -12,7 +12,7 @@ import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe.LoopBundle;
 
 public class GraphUtil {
-	static List<PropertyGraphNode> shortestpath(Graph graph, int id1, int id2){
+	static List<PropertyGraphNode> shortestpath(final Graph graph, final int id1, final int id2){
 		if(graph.getVertex(id1)==null)
     		throw new NodeNotFoundException(String.valueOf(id1));
     	else 

@@ -26,25 +26,25 @@ public class ManifestLoader {
 	//ndl.loadGraph(new File(rdfFile));
 	Graph graph;
 	String rdfFile;
-	public ManifestLoader(Graph graph,String file){
+	public ManifestLoader(final Graph graph,final String file){
 		this.rdfFile=file;
 		this.graph=graph;
 		ManifestPropertygraphImpl.convertManifestNDL(rdfFile,graph);
 		//graph.commit();
 		//graph.stopTransaction(null);
 	}
-	public ManifestLoader(String file){
+	public ManifestLoader(final String file){
 		this.rdfFile=file;
 		this.graph=new TinkerGraph();
 		ManifestPropertygraphImpl.convertManifestNDL(rdfFile,graph);
 		//graph.commit();
 		//graph.stopTransaction(null);
 	}
-	public void writeGraphML(String graphmlfile) throws IOException{
+	public void writeGraphML(final String graphmlfile) throws IOException{
 		GraphMLWriter writer=new GraphMLWriter(graph);
 		writer.outputGraph(graphmlfile);
 	}
-	public void writeGraphSON(String jsonfile) throws IOException{
+	public void writeGraphSON(final String jsonfile) throws IOException{
 		GraphSONWriter.outputGraph(graph,jsonfile);	
 	}
 	public void close(){
