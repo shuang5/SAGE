@@ -1,20 +1,13 @@
 package ndl_propertygraph;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
-
-import javax.servlet.http.HttpServletRequest;
 
 import orca.ndllib.propertygraph.connector.PropertyGraphNode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,19 +27,20 @@ public class ResourceController {
 
     private final AtomicLong counter = new AtomicLong();
     private static final Logger LOG=LoggerFactory.getLogger(ResourceController.class);
-    private ManifestLoader ml;
+    private final String defaultFile="interdomain";
+    private GraphCache cache;
     public ResourceController(){
-    	String rdfFile="/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/interdomain-manifest.rdf";
+    	cache= new GraphCache();
     	/*
     	GraphDatabaseService graphDatabaseService=new GraphDatabaseFactory().
-				newEmbeddedDatabase("/Users/shuang/Downloads/neo4j-community-2.0.4/data/graph.db");
+				newEmbeddedDatabase("graph.db");
 		Neo4j2Graph neo4jGraph=new Neo4j2Graph(graphDatabaseService);
     	ManifestPropertygraphImpl.convertManifestNDL(rdfFile,neo4jGraph);
 		neo4jGraph.commit();
 		neo4jGraph.stopTransaction(null);
 		neo4jGraph.shutdown();
 		*/
-		ml=new ManifestLoader(rdfFile);
+		//ml=new ManifestLoader(rdfFile);
     }
     @RequestMapping(value="/upload", method=RequestMethod.GET)
     public @ResponseBody String provideUploadInfo() {
@@ -54,28 +48,16 @@ public class ResourceController {
     }
 
     @RequestMapping(value="/upload", method=RequestMethod.POST)
-    public @ResponseBody String handleFileUpload(@RequestParam("name") String name,
+    public @ResponseBody String handleFileUpload(
+    		@RequestParam("name") String name,
             @RequestParam("file") MultipartFile file){
-        if (!file.isEmpty()) {
-            try {
-                byte[] bytes = file.getBytes();
-                BufferedOutputStream stream = 
-                        new BufferedOutputStream(new FileOutputStream(new File(name)));
-                stream.write(bytes);
-                stream.close();
-                return "You successfully uploaded " + name + "!";
-            } catch (Exception e) {
-                return "You failed to upload " + name + " => " + e.getMessage();
-            }
-        } else {
-            return "You failed to upload " + name + " because the file was empty.";
-        }
+        return GraphFile.saveFile(name, file);
     }
     @RequestMapping("/nodes")
-    public PropertyGraphNode nodes(@RequestParam(value="id", defaultValue="1") int id) {
-    	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
-    	Graph graph=ml.getGraph();
-    	//int i=Integer.parseInt(id);
+    public PropertyGraphNode nodes(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="id", defaultValue="1") int id) {
+    	Graph graph=cache.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
     	for(Vertex vertex:graph.getVertices()){
@@ -87,9 +69,9 @@ public class ResourceController {
     }
     
     @RequestMapping("/allnodes")
-    public List<PropertyGraphNode> allnodes() {
-    	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
-    	final Graph graph=ml.getGraph();
+    public List<PropertyGraphNode> allnodes(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId) {
+    	final Graph graph=cache.getEntry(graphId);
     	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
     	for(Vertex vertex:graph.getVertices()){
     		list.add(new PropertyGraphNode(vertex));
@@ -97,9 +79,10 @@ public class ResourceController {
 		return list;    	
     }
     @RequestMapping("/neighbors")
-    public List<PropertyGraphNode> neighbors(@RequestParam(value="id", defaultValue="1") int id) {
-    	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
-    	final Graph graph=ml.getGraph();
+    public List<PropertyGraphNode> neighbors(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="id", defaultValue="1") int id) {
+    	final Graph graph=cache.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
     	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
@@ -111,24 +94,27 @@ public class ResourceController {
 		return list;    	
     }
     @RequestMapping("/shortestpath")
-    public List<PropertyGraphNode> shortestpath(@RequestParam(value="start",required=true) int id1,
-    		@RequestParam(value="end",required=true) int id2) {
-    	//ManifestLoader ml=new ManifestLoader("/Users/shuang/Sandbox/gremlin-groovy-2.6.0/data/manifest.rdf");
-    	final Graph graph=ml.getGraph();
+    public List<PropertyGraphNode> shortestpath(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="start",required=true) int id1,
+    		@RequestParam(value="end",required=true) int id2) {   	
+    	final Graph graph=cache.getEntry(graphId);
     	return GraphUtil.shortestpath(graph, id1, id2);
     }
     @RequestMapping("/nb/shortestpath")
-    public DeferredResult<List<PropertyGraphNode>> nonBlockingShortestPath(@RequestParam(value="start",required=true) int id1,
+    public DeferredResult<List<PropertyGraphNode>> nonBlockingShortestPath(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {
         // Initiate the processing in another thread
         DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
-        ProcessingTask task = new ProcessingTask(ml.getGraph(),id1,id2, deferredResult);
+        ProcessingTask task = new ProcessingTask(cache.getEntry(graphId),id1,id2, deferredResult);
         task.start();
         return deferredResult;
     }
     @ExceptionHandler(Exception.class)
 	public ModelAndView handleAllException(Exception ex) {
-
+    	LOG.info("bad request");
 		ModelAndView model = new ModelAndView("error/generic_error");
 		model.addObject("errMsg", "this is Exception.class");
 
