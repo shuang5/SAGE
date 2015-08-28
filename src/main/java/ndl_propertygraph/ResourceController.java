@@ -24,7 +24,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 
 
 @RestController
-public class ResourceController {
+public class ResourceController{
 
     private final AtomicLong counter = new AtomicLong();
     private static final Logger LOG=LoggerFactory.getLogger(ResourceController.class);
@@ -49,9 +49,9 @@ public class ResourceController {
     }
 
     @RequestMapping(value="/upload", method=RequestMethod.POST)
-    public @ResponseBody String handleFileUpload(
+    public UploadedFile handleFileUpload(
     		@RequestParam("name") String name,
-            @RequestParam("file") MultipartFile file){
+            @RequestParam("file") MultipartFile file) throws Exception{
         return GraphFile.saveFile(name, file);
     }
     @RequestMapping("/nodes")
@@ -113,12 +113,19 @@ public class ResourceController {
         task.start();
         return deferredResult;
     }
-    @ExceptionHandler(Exception.class)
-	public ModelAndView handleAllException(Exception ex) {
-    	LOG.info("bad request");
+    @ExceptionHandler(CustomException.class)
+	public ModelAndView handleCustomException(Exception ex) {
+    	LOG.info(ex.getMessage());
 		ModelAndView model = new ModelAndView("error/generic_error");
 		model.addObject("errMsg", "this is Exception.class");
+		return model;
 
+	}
+    
+    @ExceptionHandler(Exception.class)
+	public ModelAndView handleAllException(Exception ex) {
+		ModelAndView model = new ModelAndView("error/generic_error");
+		model.addObject("errMsg", "this is Exception.class");
 		return model;
 
 	}

@@ -28,9 +28,11 @@ public class ProcessingTask extends Thread {
 	
 	@Override
 	public void run() {
-    	boolean deferredStatus = deferredResult.setResult(GraphUtil.shortestpath(graph, id1, id2));  	
-    	if(!deferredStatus){
-    		LOG.warn("non-blocking request set or expired");
-    	}
+		try{
+	    	boolean deferredStatus = deferredResult.setResult(GraphUtil.shortestpath(graph, id1, id2));  	
+	    	if(!deferredStatus){
+	    		LOG.warn("non-blocking request set or expired");
+	    	}
+		}catch(Exception ex){deferredResult.setErrorResult(ex);}
 	}
 }

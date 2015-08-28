@@ -13,7 +13,7 @@ import com.tinkerpop.blueprints.Graph;
 
 public class GraphFile {
 	private static String path="data/";
-	static String saveFile(String name, final MultipartFile file){
+	static UploadedFile saveFile(String name, final MultipartFile file) throws Exception{
 		if (!file.isEmpty()) {
             try {
                 byte[] bytes = file.getBytes();
@@ -24,7 +24,7 @@ public class GraphFile {
                 	String newName=name+'.'+thedigest;
                 	File newfile=new File(path+newName);
                 	if(newfile.exists())
-                		return "file exists, use key: "+newName;
+                		return new UploadedFile(newName);
                 	else{
                 		name=newName;
                 		f=newfile;
@@ -35,22 +35,22 @@ public class GraphFile {
                         new BufferedOutputStream(new FileOutputStream(f));
                 stream.write(bytes);
                 stream.close();
-                return "Successfully uploaded " + name + "! " + "You can use key: "+name+" to refer to it!";
+                return new UploadedFile(name);
             } catch (Exception e) {
-                return "Failed to upload " + name + " => " + e.getMessage();
+                throw e;
             }
         } else {
-            return "Failed to upload " + name + " because the file was empty.";
+            throw new IllegalStateException("File is empty");
         }
 	}
 	static ManifestLoader openFile(final String name) throws Exception{
 		File f=new File(path+name);
-        if(!f.exists())throw new FileNotFoundException("File not found!");
+        if(!f.exists())throw new FileNotFoundException(path+name);
 		return new ManifestLoader(path+name);
 	}
 	static void openFile(final String name, Graph graph) throws Exception{
 		File f=new File(path+name);
-        if(!f.exists())throw new FileNotFoundException("File not found!");
+        if(!f.exists())throw new FileNotFoundException(path+name);
 		ManifestPropertygraphImpl.convertManifestNDL(path+name, graph);
 	}
 }
