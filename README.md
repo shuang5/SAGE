@@ -23,7 +23,7 @@ http://localhost:9000/nodes?graph=x&id=1
 
 4. get all nodes with attributes on graph x
 
-http://localhost:9000/allnodes?graph=x&
+http://localhost:9000/allnodes?graph=x
 
 5. get the shortestpath between 1 and 3 using non-blocking call on graph x
 
