@@ -54,11 +54,22 @@ public class ResourceController{
             @RequestParam("file") MultipartFile file) throws Exception{
         return GraphFile.saveFile(name, file);
     }
+    @RequestMapping(value="/receive", method=RequestMethod.GET)
+    public @ResponseBody String provideReceiveInfo() {
+        return "You can upload a file by posting to this same URL.";
+    }
+
+    @RequestMapping(value="/receive", method=RequestMethod.POST)
+    public UploadedFile handleFileReceive(
+    		@RequestParam("file") String file) throws Exception{
+        return GraphFile.saveString(file);
+    }
+    
     @RequestMapping("/nodes")
     public PropertyGraphNode nodes(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="id", defaultValue="1") int id) {
-    	Graph graph=cache.getEntry(graphId);
+    	final Graph graph=cache.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
     	for(Vertex vertex:graph.getVertices()){
@@ -108,15 +119,15 @@ public class ResourceController{
     		@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {
         // Initiate the processing in another thread
-        DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
-        ProcessingTask task = new ProcessingTask(cache.getEntry(graphId),id1,id2, deferredResult);
+        final DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
+        final ProcessingTask task = new ProcessingTask(cache.getEntry(graphId),id1,id2, deferredResult);
         task.start();
         return deferredResult;
     }
     @ExceptionHandler(CustomException.class)
 	public ModelAndView handleCustomException(Exception ex) {
     	LOG.info(ex.getMessage());
-		ModelAndView model = new ModelAndView("error/generic_error");
+		final ModelAndView model = new ModelAndView("error/generic_error");
 		model.addObject("errMsg", "this is Exception.class");
 		return model;
 
@@ -124,7 +135,7 @@ public class ResourceController{
     
     @ExceptionHandler(Exception.class)
 	public ModelAndView handleAllException(Exception ex) {
-		ModelAndView model = new ModelAndView("error/generic_error");
+		final ModelAndView model = new ModelAndView("error/generic_error");
 		model.addObject("errMsg", "this is Exception.class");
 		return model;
 

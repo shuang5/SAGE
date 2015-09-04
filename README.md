@@ -1,24 +1,32 @@
 # SAGE
 A REST server using spring.
 
-Example userage:
+Example usage:
 
-I. get the shortestpath between node id 1 and 3
+1. upload 
 
-http://localhost:9000/shortestpath?start=1&end=3
+	I. use html: http://localhost:9000
+	
+	II. use curl: curl -F 'name=interdomain' -F 'file=@/path/to/data.rdf' http://localhost:9000/upload
+	
+	III. use compressed string (gzip+base64): http://localhost:9000/receive?file=...
+	
+REST returns a key for every successful uploaded graph, which is used by users as an ID
+ 	
+2. get the shortestpath between node id 1 and 3 on graph x
 
-II. get the attributes of node id 1
+http://localhost:9000/shortestpath?graph=x&start=1&end=3
 
-http://localhost:9000/nodes?id=1
+3. get the attributes of node id 1 on graph x
 
-III. get all nodes with attributes
+http://localhost:9000/nodes?graph=x&id=1 
 
-http://localhost:9000/allnodes
+4. get all nodes with attributes on graph x
 
-IV. get the shortestpath between 1 and 3 using non-blocking call
+http://localhost:9000/allnodes?graph=x&
 
-http://localhost:9000/nb/shortestpath?start=1&end=3
+5. get the shortestpath between 1 and 3 using non-blocking call on graph x
 
-V. upload 
+http://localhost:9000/nb/shortestpath?graph=x&start=1&end=3
 
-http://localhost:9000
+
