@@ -3,7 +3,7 @@ A REST server using spring.
 
 Example usage:
 
-1. upload 
+I. upload 
 
 	I. use html: http://localhost:9000
 	
@@ -13,19 +13,27 @@ Example usage:
 	
 REST returns a key for every successful uploaded graph, which is used by users as an ID
  	
-2. get the shortestpath between node id 1 and 3 on graph x
+II. get the shortestpath between node id 1 and 3 on graph x
 
 http://localhost:9000/shortestpath?graph=x&start=1&end=3
 
-3. get the attributes of node id 1 on graph x
+III. get the neighbors of node id 1 on graph x
+
+http://localhost:9000/neighbors?graph=x&id=1
+
+IV. get the attributes of node id 1 on graph x
 
 http://localhost:9000/nodes?graph=x&id=1 
 
-4. get all nodes with attributes on graph x
+V. get all nodes with attributes on graph x
 
 http://localhost:9000/allnodes?graph=x
 
-5. get the shortestpath between 1 and 3 using non-blocking call on graph x
+VI. get all VMs with attributes on graph x
+
+http://localhost:9000/allVMs?graph=x
+
+VII. get the shortestpath between 1 and 3 using non-blocking call on graph x
 
 http://localhost:9000/nb/shortestpath?graph=x&start=1&end=3
 

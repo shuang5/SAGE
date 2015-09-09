@@ -90,6 +90,17 @@ public class ResourceController{
     	}
 		return list;    	
     }
+    @RequestMapping("/allVMs")
+    public List<PropertyGraphNode> allVMs(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId) {
+    	final Graph graph=cache.getEntry(graphId);
+    	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
+    	for(Vertex vertex:graph.getVertices()){
+    		if(!GraphUtil.isVertexVlan(vertex))
+    			list.add(new PropertyGraphNode(vertex));
+    	}
+		return list;    	
+    }
     @RequestMapping("/neighbors")
     public List<PropertyGraphNode> neighbors(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,

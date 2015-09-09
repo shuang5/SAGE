@@ -43,4 +43,18 @@ public class GraphUtil {
     	}
 		return list;
 	}
+	static boolean isVertexVM(final Vertex v){
+		String url=v.getProperty("url");
+		if (!url.substring(url.length()-4).equals("vlan")) 
+			return true;
+		else 
+			return false;
+	}
+	static boolean isVertexVlan(final Vertex v){
+		String url=v.getProperty("url");
+		if (url.substring(url.length()-4).equals("vlan")) 
+			return true;
+		else 
+			return false;
+	}
 }
