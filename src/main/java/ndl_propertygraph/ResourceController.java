@@ -8,6 +8,9 @@ import orca.ndllib.propertygraph.connector.PropertyGraphNode;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.InvalidPropertyException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -29,9 +32,20 @@ public class ResourceController{
     private final AtomicLong counter = new AtomicLong();
     private static final Logger LOG=LoggerFactory.getLogger(ResourceController.class);
     private final String defaultFile="interdomain";
-    private GraphCache cache;
+    private BackEnd be;
+
+	private ApplicationContext ctx = 
+			   new AnnotationConfigApplicationContext(MyPropertiesConfig.class);
+	MyProperties mp=ctx.getBean(MyProperties.class);
     public ResourceController(){
-    	cache= new GraphCache();
+    	if(mp.getBackend().equals("guava")){
+    		be=new GuavaCacheBackEnd();
+    	}
+    	else if(mp.getBackend().equals("titan")){
+    		be=new TitanGraphBackEnd();
+    	}
+    	else 
+    		throw new InvalidPropertyException(MyPropertiesConfig.class,"backend","unrecognized backend!");
     	/*
     	GraphDatabaseService graphDatabaseService=new GraphDatabaseFactory().
 				newEmbeddedDatabase("graph.db");
@@ -52,7 +66,7 @@ public class ResourceController{
     public UploadedFile handleFileUpload(
     		@RequestParam("name") String name,
             @RequestParam("file") MultipartFile file) throws Exception{
-        return GraphFile.saveFile(name, file);
+        return be.saveEntry(name, file);
     }
     @RequestMapping(value="/receive", method=RequestMethod.GET)
     public @ResponseBody String provideReceiveInfo() {
@@ -62,14 +76,14 @@ public class ResourceController{
     @RequestMapping(value="/receive", method=RequestMethod.POST)
     public UploadedFile handleFileReceive(
     		@RequestParam("file") String file) throws Exception{
-        return GraphFile.saveString(file);
+        return be.saveEntry(file);
     }
     
     @RequestMapping("/nodes")
     public PropertyGraphNode nodes(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="id", defaultValue="1") int id) {
-    	final Graph graph=cache.getEntry(graphId);
+    	final Graph graph=be.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
     	for(Vertex vertex:graph.getVertices()){
@@ -83,7 +97,7 @@ public class ResourceController{
     @RequestMapping("/allnodes")
     public List<PropertyGraphNode> allnodes(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId) {
-    	final Graph graph=cache.getEntry(graphId);
+    	final Graph graph=be.getEntry(graphId);
     	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
     	for(Vertex vertex:graph.getVertices()){
     		list.add(new PropertyGraphNode(vertex));
@@ -93,7 +107,7 @@ public class ResourceController{
     @RequestMapping("/allVMs")
     public List<PropertyGraphNode> allVMs(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId) {
-    	final Graph graph=cache.getEntry(graphId);
+    	final Graph graph=be.getEntry(graphId);
     	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
     	for(Vertex vertex:graph.getVertices()){
     		if(!GraphUtil.isVertexVlan(vertex))
@@ -105,7 +119,7 @@ public class ResourceController{
     public List<PropertyGraphNode> neighbors(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="id", defaultValue="1") int id) {
-    	final Graph graph=cache.getEntry(graphId);
+    	final Graph graph=be.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
     	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
@@ -121,7 +135,7 @@ public class ResourceController{
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {   	
-    	final Graph graph=cache.getEntry(graphId);
+    	final Graph graph=be.getEntry(graphId);
     	return GraphUtil.shortestpath(graph, id1, id2);
     }
     @RequestMapping("/nb/shortestpath")
@@ -131,7 +145,7 @@ public class ResourceController{
     		@RequestParam(value="end",required=true) int id2) {
         // Initiate the processing in another thread
         final DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
-        final ProcessingTask task = new ProcessingTask(cache.getEntry(graphId),id1,id2, deferredResult);
+        final ProcessingTask task = new ProcessingTask(be.getEntry(graphId),id1,id2, deferredResult);
         task.start();
         return deferredResult;
     }

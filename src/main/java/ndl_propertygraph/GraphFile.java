@@ -1,10 +1,8 @@
 package ndl_propertygraph;
 
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
@@ -23,7 +21,7 @@ import com.tinkerpop.blueprints.Graph;
 public class GraphFile {
 	private static final Logger LOG = LoggerFactory.getLogger(GraphFile.class);
 	private static String path="data/";
-	static UploadedFile saveFile(String name, final MultipartFile file) throws Exception{
+	static UploadedFile saveFile(String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException{
 		if (!file.isEmpty()) {
             try {
                 final byte[] bytes = file.getBytes();
@@ -46,7 +44,7 @@ public class GraphFile {
                 stream.write(bytes);
                 stream.close();
                 return new UploadedFile(name);
-            } catch (Exception e) {
+            } catch (IOException e) {
                 throw e;
             }
         } else {
@@ -101,9 +99,10 @@ public class GraphFile {
 	}
 	
 	public static void main(String[] args){
-		String name="interdomain";
+		final String name="interdomain";
+		final BufferedReader br;
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(path+name));
+			br = new BufferedReader(new FileReader(path+name));
 			StringBuilder sb = new StringBuilder();
 		    String line = br.readLine();
 
@@ -114,6 +113,7 @@ public class GraphFile {
 		    }
 		    String everything = sb.toString();
 		    saveString(CompressEncode.compressEncode(everything));
+		    br.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
