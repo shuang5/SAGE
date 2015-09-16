@@ -21,23 +21,19 @@ import com.tinkerpop.blueprints.Graph;
 public class GraphFile {
 	private static final Logger LOG = LoggerFactory.getLogger(GraphFile.class);
 	private static String path="data/";
-	static UploadedFile saveFile(String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException{
+	public static void setPath(String path){
+		GraphFile.path=path;
+	}
+	public static String getPath(){
+		return GraphFile.path;
+	}
+	static UploadedFile saveFile(final String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException{
 		if (!file.isEmpty()) {
             try {
                 final byte[] bytes = file.getBytes();
                 final MessageDigest md = MessageDigest.getInstance("MD5");
                 final byte[] thedigest = md.digest(bytes);                
-                File f=new File(path+name);
-                if(f.exists()){
-                	String newName=name+'.'+thedigest;
-                	File newfile=new File(path+newName);
-                	if(newfile.exists())
-                		return new UploadedFile(newName);
-                	else{
-                		name=newName;
-                		f=newfile;
-                	}
-                }
+                final File f=new File(path+name);
                 
                 BufferedOutputStream stream = 
                         new BufferedOutputStream(new FileOutputStream(f));

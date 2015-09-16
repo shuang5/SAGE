@@ -22,7 +22,10 @@ public class GuavaCacheBackEnd implements BackEnd{
 
 	@Override
 	public UploadedFile saveEntry(String name, MultipartFile file) throws IOException, NoSuchAlgorithmException {
-		return GraphFile.saveFile(name, file);
+		String key=name;
+		if(KeyCheck.fileExist(name))
+			key=KeyCheck.generateNewKey(name);
+		return GraphFile.saveFile(key, file);
 	}
 	
 

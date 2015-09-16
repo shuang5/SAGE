@@ -1,5 +1,6 @@
 package ndl_propertygraph;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -40,9 +41,12 @@ public class ResourceController{
     public ResourceController(){
     	if(mp.getBackend().equals("guava")){
     		be=new GuavaCacheBackEnd();
+    		String dir=mp.getBackenddir();
+    		if (!dir.endsWith(File.separator))dir+=File.separator;
+    		GraphFile.setPath(dir);
     	}
     	else if(mp.getBackend().equals("titan")){
-    		be=new TitanGraphBackEnd();
+    		be=new TitanGraphBackEnd(mp);
     	}
     	else 
     		throw new InvalidPropertyException(MyPropertiesConfig.class,"backend","unrecognized backend!");
@@ -150,19 +154,14 @@ public class ResourceController{
         return deferredResult;
     }
     @ExceptionHandler(CustomException.class)
-	public ModelAndView handleCustomException(Exception ex) {
+	public String handleCustomException(Exception ex) {
     	LOG.info(ex.getMessage());
-		final ModelAndView model = new ModelAndView("error/generic_error");
-		model.addObject("errMsg", "this is Exception.class");
-		return model;
-
+		return "Custom Exception: "+ex.getMessage();
 	}
     
     @ExceptionHandler(Exception.class)
-	public ModelAndView handleAllException(Exception ex) {
-		final ModelAndView model = new ModelAndView("error/generic_error");
-		model.addObject("errMsg", "this is Exception.class");
-		return model;
-
+	public String handleAllException(Exception ex) {
+    	LOG.info(ex.getMessage());
+		return "System Exception:"+ex.getMessage();
 	}
 }

@@ -7,14 +7,23 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
-@PropertySource("classpath:config.properties")
+@PropertySource(value="classpath:config.properties",ignoreResourceNotFound=true)
 public class MyPropertiesConfig {
 	@Value("${backend}")
     private String backend;
+	
+	@Value("${titanbackend}")
+    private String titanbackend;
+
+	@Value("${backenddir}")
+    private String backenddir;
+	
 	@Bean
 	public MyProperties MyProperties (){
 		MyProperties mp=new MyProperties();
 		mp.setBackend(backend);
+		mp.setTitanbackend(titanbackend);
+		mp.setBackenddir(backenddir);
 		return mp;
 	}
 	@Bean
