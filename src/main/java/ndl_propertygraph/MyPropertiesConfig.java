@@ -8,7 +8,7 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
 @Configuration
 @PropertySource(value="classpath:config.properties",ignoreResourceNotFound=true)
-public class MyPropertiesConfig {
+public final class MyPropertiesConfig {
 	@Value("${backend}")
     private String backend;
 	

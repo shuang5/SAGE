@@ -25,7 +25,7 @@ public class TitanGraphBackEnd implements BackEnd{
 	}
 
 	@Override
-	public Graph getEntry(String key) {		
+	public Graph getEntry(final String key) {		
 		if(!KeyCheck.keyIsValid(key))throw new KeyFormatException("Key format error:");
 		TitanGraph graph=null;
         if (mp.getTitanbackend().equals("berkeleyje")){

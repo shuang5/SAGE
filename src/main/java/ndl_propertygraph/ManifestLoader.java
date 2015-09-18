@@ -24,8 +24,8 @@ public class ManifestLoader {
 	//PropertyGraphFactory propertyGraphFactory=new PropertyGraphFactory(neo4jGraph);
 	//NdlToPropertyGraph ndl=new NdlToPropertyGraph(propertyGraphFactory);
 	//ndl.loadGraph(new File(rdfFile));
-	Graph graph;
-	String rdfFile;
+	private final Graph graph;
+	private final String rdfFile;
 	public ManifestLoader(final Graph graph,final String file){
 		this.rdfFile=file;
 		this.graph=graph;

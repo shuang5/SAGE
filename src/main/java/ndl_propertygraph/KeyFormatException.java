@@ -11,7 +11,7 @@ public class KeyFormatException extends CustomException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public KeyFormatException(String file) {
+	public KeyFormatException(final String file) {
 		super("name must be alphanumerical!");
 	}
     // ...

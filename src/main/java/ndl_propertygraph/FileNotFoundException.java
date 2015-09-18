@@ -12,7 +12,7 @@ public class FileNotFoundException extends CustomException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public FileNotFoundException(String file) {
+	public FileNotFoundException(final String file) {
 		super("File "+file+" not found!");
 	}
     // ...

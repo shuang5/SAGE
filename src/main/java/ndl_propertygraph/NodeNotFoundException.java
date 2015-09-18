@@ -11,7 +11,7 @@ public class NodeNotFoundException extends CustomException {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public NodeNotFoundException(String id) {
+	public NodeNotFoundException(final String id) {
 		super("Node "+id+" can not be found!");
 	}
     // ...

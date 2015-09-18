@@ -2,7 +2,7 @@ package ndl_propertygraph;
 
 public class CustomException extends RuntimeException{
 
-	public CustomException(String reason) {
+	public CustomException(final String reason) {
 		super(reason);
 	}
 

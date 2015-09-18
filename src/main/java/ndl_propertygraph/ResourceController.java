@@ -28,16 +28,16 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 
 
 @RestController
-public class ResourceController{
+public final class ResourceController{
 
     private final AtomicLong counter = new AtomicLong();
     private static final Logger LOG=LoggerFactory.getLogger(ResourceController.class);
     private final String defaultFile="interdomain";
-    private BackEnd be;
+    private final BackEnd be;
 
-	private ApplicationContext ctx = 
+	private final ApplicationContext ctx = 
 			   new AnnotationConfigApplicationContext(MyPropertiesConfig.class);
-	MyProperties mp=ctx.getBean(MyProperties.class);
+	private final MyProperties mp=ctx.getBean(MyProperties.class);
     public ResourceController(){
     	if(mp.getBackend().equals("guava")){
     		be=new GuavaCacheBackEnd();

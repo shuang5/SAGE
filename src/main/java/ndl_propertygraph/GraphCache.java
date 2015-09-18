@@ -8,7 +8,7 @@ import com.google.common.cache.LoadingCache;
 import com.tinkerpop.blueprints.Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 
-public class GraphCache {
+public final class GraphCache {
 	private static final long MAX_SIZE = 100;
 	 
 	  private final LoadingCache<String, Graph> cache;
@@ -28,7 +28,7 @@ public class GraphCache {
 	    );
 	  }
 	 
-	  public Graph getEntry( String key ) {
+	  public Graph getEntry(final String key ) {
 	    return cache.getUnchecked( key );
 	  }
 	 

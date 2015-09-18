@@ -15,10 +15,10 @@ public class ProcessingTask extends Thread {
 
     private static final Logger LOG = LoggerFactory.getLogger(ProcessingTask.class);
 
-	private DeferredResult<List<PropertyGraphNode>> deferredResult;
-	private Graph graph;
-	private int id1;
-	private int id2;
+	private final DeferredResult<List<PropertyGraphNode>> deferredResult;
+	private final Graph graph;
+	private final int id1;
+	private final int id2;
 	public ProcessingTask( final Graph graph, final int id1,final int id2,DeferredResult<List<PropertyGraphNode>> deferredResult) {
 		this.deferredResult = deferredResult;
 		this.graph=graph;

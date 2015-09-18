@@ -10,6 +10,6 @@ import com.tinkerpop.blueprints.Graph;
 
 public interface BackEnd {
 	public Graph getEntry(final String key);
-	public UploadedFile saveEntry(String file) throws DataFormatException, IOException;
-	public UploadedFile saveEntry(String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException;
+	public UploadedFile saveEntry(final String file) throws DataFormatException, IOException;
+	public UploadedFile saveEntry(final String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException;
 }

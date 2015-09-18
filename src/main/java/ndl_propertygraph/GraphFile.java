@@ -47,7 +47,7 @@ public class GraphFile {
             throw new IllegalStateException("File is empty");
         }
 	}
-	static UploadedFile saveString(String file) throws DataFormatException, IOException{
+	static UploadedFile saveString(final String file) throws DataFormatException, IOException{
 		if(file.isEmpty())throw new IllegalStateException("File is empty");
 		final String result= CompressEncode.decodeDecompress(file);
 		final byte[] bytes = result.getBytes();

@@ -11,7 +11,7 @@ import com.tinkerpop.gremlin.java.GremlinPipeline;
 import com.tinkerpop.pipes.PipeFunction;
 import com.tinkerpop.pipes.branch.LoopPipe.LoopBundle;
 
-public class GraphUtil {
+public final class GraphUtil {
 	static List<PropertyGraphNode> shortestpath(final Graph graph, final int id1, final int id2){
 		if(graph.getVertex(id1)==null)
     		throw new NodeNotFoundException(String.valueOf(id1));
@@ -51,7 +51,7 @@ public class GraphUtil {
 			return false;
 	}
 	static boolean isVertexVlan(final Vertex v){
-		String url=v.getProperty("url");
+		final String url=v.getProperty("url");
 		if (url.substring(url.length()-4).equals("vlan")) 
 			return true;
 		else 

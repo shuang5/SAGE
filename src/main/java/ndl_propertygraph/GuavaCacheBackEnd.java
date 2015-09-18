@@ -9,19 +9,19 @@ import org.springframework.web.multipart.MultipartFile;
 import com.tinkerpop.blueprints.Graph;
 
 public class GuavaCacheBackEnd implements BackEnd{
-	GraphCache cache=new GraphCache();
+	final GraphCache cache=new GraphCache();
 	@Override
-	public Graph getEntry(String key) {
+	public Graph getEntry(final String key) {
 		return cache.getEntry(key);
 	}
 
 	@Override
-	public UploadedFile saveEntry(String file) throws DataFormatException, IOException {
+	public UploadedFile saveEntry(final String file) throws DataFormatException, IOException {
 		return GraphFile.saveString(file);
 	}
 
 	@Override
-	public UploadedFile saveEntry(String name, MultipartFile file) throws IOException, NoSuchAlgorithmException {
+	public UploadedFile saveEntry(final String name, final MultipartFile file) throws IOException, NoSuchAlgorithmException {
 		String key=name;
 		if(KeyCheck.fileExist(name))
 			key=KeyCheck.generateNewKey(name);

@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
-public class KeyCheck {
+public final class KeyCheck {
 	static public boolean keyIsValid(final String key){
 		Pattern p = Pattern.compile("[^a-zA-Z0-9]");
 		boolean hasSpecialChar = p.matcher(key).find();
