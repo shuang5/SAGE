@@ -4,11 +4,11 @@ import java.io.IOException;
 
 import orca.ndllib.propertygraph.ManifestPropertygraphImpl;
 
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
+//import org.neo4j.graphdb.GraphDatabaseService;
+//import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 
 import com.tinkerpop.blueprints.Graph;
-import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
+//import com.tinkerpop.blueprints.impls.neo4j2.Neo4j2Graph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.util.io.graphml.GraphMLWriter;
 import com.tinkerpop.blueprints.util.io.graphson.GraphSONWriter;

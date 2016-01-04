@@ -83,10 +83,10 @@ public final class ResourceController{
         return be.saveEntry(file);
     }
     
-    @RequestMapping("/nodes")
-    public PropertyGraphNode nodes(
+    @RequestMapping("/id/nodes")
+    public PropertyGraphNode idNodes(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
-    		@RequestParam(value="id", defaultValue="1") int id) {
+    		@RequestParam(value="uid", defaultValue="1") int id) {
     	final Graph graph=be.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
@@ -97,7 +97,13 @@ public final class ResourceController{
     	}
 		return null;    	
     }
-    
+    @RequestMapping("/node")
+    public PropertyGraphNode node(
+    		@RequestParam(value="graph") String graphId,
+    		@RequestParam(value="id") String id) {
+    	final Graph graph=be.getEntry(graphId);
+    	return new PropertyGraphNode(GraphUtil.getVertexByUrl(graph, id));   	
+    }
     @RequestMapping("/allnodes")
     public List<PropertyGraphNode> allnodes(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId) {
@@ -119,10 +125,10 @@ public final class ResourceController{
     	}
 		return list;    	
     }
-    @RequestMapping("/neighbors")
-    public List<PropertyGraphNode> neighbors(
+    @RequestMapping("/id/neighbors")
+    public List<PropertyGraphNode> idNeighbors(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
-    		@RequestParam(value="id", defaultValue="1") int id) {
+    		@RequestParam(value="uid", defaultValue="1") int id) {
     	final Graph graph=be.getEntry(graphId);
     	if(graph.getVertex(id)==null)
     		throw new NodeNotFoundException(String.valueOf(id));
@@ -134,22 +140,60 @@ public final class ResourceController{
     	}
 		return list;    	
     }
-    @RequestMapping("/shortestpath")
-    public List<PropertyGraphNode> shortestpath(
+    @RequestMapping("/neighbors")
+    public List<PropertyGraphNode> neighbors(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="id") String id) {
+    	final Graph graph=be.getEntry(graphId);
+    	Vertex vtx=GraphUtil.getVertexByUrl(graph, id);
+    	if(vtx==null)
+    		throw new NodeNotFoundException(String.valueOf(id));
+    	List<PropertyGraphNode> list=new ArrayList<PropertyGraphNode>();
+    	GremlinPipeline<Vertex, Vertex> pipe = new GremlinPipeline<Vertex, Vertex>();
+    	pipe.start(vtx).both("connectedTo");
+    	for(Object vertex:pipe){
+    		list.add(new PropertyGraphNode((Vertex)vertex));
+    	}
+		return list;    	
+    }
+    @RequestMapping("/id/shortestpath")
+    public List<PropertyGraphNode> idShortestpath(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {   	
     	final Graph graph=be.getEntry(graphId);
     	return GraphUtil.shortestpath(graph, id1, id2);
     }
-    @RequestMapping("/nb/shortestpath")
-    public DeferredResult<List<PropertyGraphNode>> nonBlockingShortestPath(
+    @RequestMapping("/shortestpath")
+    public List<PropertyGraphNode> shortestpath(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="start",required=true) String id1,
+    		@RequestParam(value="end",required=true) String id2) {   	
+    	final Graph graph=be.getEntry(graphId);
+    	return GraphUtil.shortestpath(graph, id1, id2);
+    }
+    @RequestMapping("/nb/id/shortestpath")
+    public DeferredResult<List<PropertyGraphNode>> nonBlockingIdShortestPath(
     		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
     		@RequestParam(value="start",required=true) int id1,
     		@RequestParam(value="end",required=true) int id2) {
         // Initiate the processing in another thread
         final DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
         final ProcessingTask task = new ProcessingTask(be.getEntry(graphId),id1,id2, deferredResult);
+        task.start();
+        return deferredResult;
+    }
+    @RequestMapping("/nb/shortestpath")
+    public DeferredResult<List<PropertyGraphNode>> nonBlockingShortestPath(
+    		@RequestParam(value="graph", defaultValue=defaultFile) String graphId,
+    		@RequestParam(value="start",required=true) String id1,
+    		@RequestParam(value="end",required=true) String id2) {
+        // Initiate the processing in another thread
+        final DeferredResult<List<PropertyGraphNode>> deferredResult = new DeferredResult<>();
+        final Graph graph=be.getEntry(graphId);
+        int i1=(int)GraphUtil.getIdByUrl(graph, id1);
+        int i2=(int)GraphUtil.getIdByUrl(graph, id2);
+        final ProcessingTask task = new ProcessingTask(graph,i1,i2, deferredResult);
         task.start();
         return deferredResult;
     }

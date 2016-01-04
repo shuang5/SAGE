@@ -1,5 +1,7 @@
 package ndl_propertygraph;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +45,11 @@ public final class GraphUtil {
     	}
 		return list;
 	}
+	static List<PropertyGraphNode> shortestpath(final Graph graph, final String id1, final String id2){
+		int  i1=Integer.valueOf((String) getIdByUrl(graph,id1));
+		int  i2=Integer.valueOf((String) getIdByUrl(graph,id2));
+		return shortestpath(graph,i1,i2);
+	}
 	static boolean isVertexVM(final Vertex v){
 		String url=v.getProperty("url");
 		if (!url.substring(url.length()-4).equals("vlan")) 
@@ -56,5 +63,33 @@ public final class GraphUtil {
 			return true;
 		else 
 			return false;
+	}
+	static Object getIdByUrl(final Graph graph, final String id){
+		for(Vertex v:graph.getVertices()){
+			try{
+			URL u=new URL((String) v.getProperty("url"));
+			if(id.equals(u.getRef()))
+				return v.getId();
+			}catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//return null;
+		throw new NodeNotFoundException(id);
+	}
+	static Vertex getVertexByUrl(final Graph graph, final String id){
+		for(Vertex v:graph.getVertices()){
+			try {
+				URL u = new URL((String) v.getProperty("url"));
+				if(id.equals(u.getRef()))
+					return v;
+			} catch (MalformedURLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		//return null;
+		throw new NodeNotFoundException(id);
 	}
 }
