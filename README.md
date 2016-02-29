@@ -12,7 +12,7 @@ I. upload
 	III. use compressed string (gzip+base64): http://localhost:9000/receive?file=...
 	
 REST returns a key for every successful uploaded graph, which is used by users as an ID for the graph (gid). Each element (node or link) also has an ID (nid). Specifically for an NDL manifest, a resource is unqiuely identified by something like:
-http://geni-orca.renci.org/owl/f38fd903-e77f-40c6-8749-888fd144e9ad#Node0
+http://geni-orca.renci.org/owl/f38fd903-e77f-40c6-8749-888fd144e9ad#Node0.
 In this case, Node0 can be used as nid.
  	
 II. get the shortestpath between nid 1 and 3 on gid x
